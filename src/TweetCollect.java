@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import twitter4j.GeoLocation;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.Status;
@@ -29,6 +30,8 @@ public class TweetCollect {
 		cb.setOAuthConsumerSecret(CONSUMER_SECRET);
 		cb.setOAuthAccessToken(ACCESS_TOKEN);
 		cb.setOAuthAccessTokenSecret(ACCESS_TOKEN_SECRET);
+		double lantitude = 40.730468;
+		double longtitude = -73.997701;
 		
 		//create buffered writer to write results into dataset file
 		try {
@@ -44,18 +47,13 @@ public class TweetCollect {
 		}
 		
 		twitter = new TwitterFactory(cb.build()).getInstance();
-		Query query = new Query("movie");
+		Query query = new Query("party OR play OR fire");
+		query.setGeoCode(new GeoLocation(lantitude, longtitude), 5.5, Query.MILES);
+		query.setLang("en");
 		query.setCount(100); 	// set number of tweets returned per page to 100
 
 		writeToFile(query);
-		System.out.println("Finish collect");
-		//printSearchResultsPerPage(result);
-		//if there is next page print next page
-//		if (result.hasNext()) {
-//			query = result.nextQuery();
-//			result = twitter.search(query);
-//		}
-//		printSearchResultsPerPage(result);
+		System.out.println("Finish collecting");
 		
 		//close buffered writer
 		try {
