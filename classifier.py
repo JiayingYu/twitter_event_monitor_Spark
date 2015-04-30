@@ -60,3 +60,23 @@ def construct_vector(words):
 		else:
 			vector.append(0)
 	return vector
+
+def construct_labeled_point(line):
+	words = line[1]
+	vector = []
+	for w in features:
+		if (w in words):
+			vector.append(1)
+		else:
+			vector.append(0)
+	return LabeledPoint(line[0], vector)
+
+from pyspark.mllib.regression import LabeledPoint
+#create the training data
+training_data = label_words_pairs1.map(lambda fields: [fields[0], construct_vector(fields[1])])
+training_data = label_words_pairs1.map(lambda fields: construct_labeled_point(fields))
+
+#train logistic regression model
+from pyspark.mllib.classification import LogisticRegressionWithLBFGS
+lrModel = LogisticRegressionWithLBFGS.train(training_data)
+
