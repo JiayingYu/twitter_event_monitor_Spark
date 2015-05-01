@@ -80,3 +80,4 @@ training_data = label_words_pairs1.map(lambda fields: construct_labeled_point(fi
 from pyspark.mllib.classification import LogisticRegressionWithLBFGS
 lrModel = LogisticRegressionWithLBFGS.train(training_data)
 
+lrModel.predict(training_data.first().features)
