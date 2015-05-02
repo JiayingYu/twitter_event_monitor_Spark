@@ -31,12 +31,40 @@ public class TweetCollect {
 		cb.setOAuthConsumerSecret(CONSUMER_SECRET);
 		cb.setOAuthAccessToken(ACCESS_TOKEN);
 		cb.setOAuthAccessTokenSecret(ACCESS_TOKEN_SECRET);
-		double lantitude = 40.730468;
-		double longtitude = -73.997701;
+		twitter = new TwitterFactory(cb.build()).getInstance();
 
+		//collectParty();
+		collectEmergency();
+		
+
+	}
+
+	private static void collectEmergency() throws TwitterException {
+		Query queryEmergency = new Query("delay OR collision OR explosion -filter:retweets");
+		GeoLocation nyc = new GeoLocation(40.758996, -73.978679);
+		//queryEmergency.since("2015-02-01");
+		queryEmergency.setGeoCode(nyc, 100, Query.MILES);
+		String emergencyOutput = "emergency_dataset.txt";
+		collect(queryEmergency, emergencyOutput);
+		
+	}
+
+	public static void collectParty() throws TwitterException {
+	//collect tweets about party near washington square park
+			GeoLocation washingtonSqr = new GeoLocation(40.730468, -73.997701);
+			// excludes the duplicate tweets by filter out the retweets
+			Query queryParty = new Query("party OR beer OR fire -filter:retweets");
+			queryParty.setGeoCode(washingtonSqr, 5.0, Query.MILES);
+			String partyOutput = "party_dataset_raw.txt";
+			collect(queryParty, partyOutput);
+	}
+
+	//search and collect dataset based on given query, location and write to the 
+	//output file path
+	public static void collect(Query query, String outputFile) throws TwitterException {
 		// create buffered writer to write results into dataset file
 		try {
-			File out = new File("beer_dataset.txt");
+			File out = new File(outputFile);
 			if (out.exists()) {
 				out.createNewFile();
 			}
@@ -47,11 +75,6 @@ public class TweetCollect {
 			e.printStackTrace();
 		}
 
-		twitter = new TwitterFactory(cb.build()).getInstance();
-		
-		//excludes the duplicate tweets by filter out the retweets
-		Query query = new Query("beer -filter:retweets");
-		query.setGeoCode(new GeoLocation(lantitude, longtitude), 5.0, Query.MILES);
 		query.setLang("en");
 		query.setCount(100); // set number of tweets returned per page to 100
 
@@ -66,7 +89,7 @@ public class TweetCollect {
 		}
 	}
 
-	//print the query result to console
+	// print the query result to console
 	public static void printSearchResultsPerPage(QueryResult result) {
 		for (Status status : result.getTweets()) {
 			System.out.println("@" + status.getUser().getScreenName() + ":"
@@ -76,8 +99,8 @@ public class TweetCollect {
 
 	public static void writeToFile(Query query) throws TwitterException {
 		QueryResult result = twitter.search(query);
-		//collect 300 tweets
-		for (int i = 0; i < 1; i++) {
+		// collect 300 tweets
+		for (int i = 0; i < 4; i++) {
 			for (Status status : result.getTweets()) {
 				String content = status.getText();
 				content.replaceAll("\\r", " ");

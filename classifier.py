@@ -37,8 +37,8 @@ def extract_words_wordpunct(tweet):
 	for w in tweet:
 		w.strip(',.#@ ')
 	tweet = [w for w in tweet if re.search('[a-zA-Z]+', w) and len(w) > 2]
-	bag_of_words = [w for w in tweet if w not in nonsense_words]
-	return bag_of_words
+	#bag_of_words = [w for w in tweet if w not in nonsense_words]
+	return tweet
 
 #this function is not used
 def construct_vector(words):
@@ -63,8 +63,9 @@ def construct_labeled_point(line, features):
 
 #extract features set from parsed data 
 def feature_extraction(parsed_lines):
-	nonsense_words = ["all", "are", "can", "and", "the", "https", "http", "co", "in", "this", "what", "so", "we", "me", "off", "just", "for", "was", "with", "you", "that","an", "of", "on", "it", "to", "is", "my","all", "very", "from", "99u", "our", "got", "don"]
+	nonsense_words = ["all", "are", "can", "and", "the", "https", "http", "co", "in", "this", "what", "so", "we", "me", "just", "for", "was", "with", "you", "that","an", "of", "on", "it", "to", "is", "my","all", "very", "from", "99u", "our", "got", "don"]
 	all_words = parsed_lines.map(lambda line: line[1]).flatMap(lambda x: x)
+	all_words = all_words.filter(lambda x: x not in nonsense_words)
 	word_count = all_words.map(lambda x: (x, 1.0)).reduceByKey(lambda x,y: x+y)
 	#word_count_sorted = word_count.sortBy(lambda x: x[1], ascending = False)
 	features = word_count.filter(lambda x: x[1] >= 4).map(lambda x: x[0]).collect()
@@ -77,12 +78,50 @@ def is_correct(model, point):
 	else: 
 		return 0
 
+def training(path):
+	#import dataset into RDD
+	raw_data = sc.textFile(path)
+	#parse raw data into label bag-of-words pairs
+	parsed_data = raw_data.map(lambda line: parse_line(line))
+	#separate into training set and test set
+	training_set, test_set = parsed_data.randomSplit([0.6, 0.4], 17)
+	#get features for model training
+	features = feature_extraction(training_set)
+	labeled_points_training = training_set.map(lambda line: construct_labeled_point(line, features))
+	labeled_points_test = test_set.map(lambda line: construct_labeled_point(line, features))
+	#train logistic regression model
+	lrModel = LogisticRegressionWithLBFGS.train(labeled_points_training)
+	#train naive bayes model
+	nbModel = NaiveBayes.train(labeled_points_training)
+	return lrModel, nbModel, labeled_points_test
 
+def accuracy(model, labeled_points):
+	num_correct_predict = labeled_points.map(lambda point: is_correct(model, point)).sum()
+	accuracy = double(num_correct_predict) / labeled_points.count()
+	return accuracy
+
+party_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/party_dataset.txt"
+lr_model_party, nb_model_party, lp_test_party = training(party_file)
+lr_accuracy = accuracy(lr_model_party, lp_test_party)
+nb_accuracy = accuracy(nb_model_party, lp_test_party)
+print ("Accuracy of LogisticRegression Model for Party: " + str(lr_accuracy))
+print ("Accuracy of NaiveBayes Model for Party: " + str(nb_accuracy))
+
+
+emer_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/emermg_small.txt"
+lr_model_emer, nb_model_emer, lp_test_emer = training(emer_file)
+emer_lr_acc = accuracy(lr_model_emer, lp_test_emer)
+emer_nb_acc = accuracy(nb_model_emer, lp_test_emer)
+print emer_lr_acc
+print emer_nb_acc
+
+
+"""
 file_path = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/party_dataset.txt"
 #import dataset into RDD
 raw_data = sc.textFile(file_path)
 #parse raw data into label bag-of-words pairs
-parsed_data = raw_data.map(lambda line: parse_line(line))
+parsed_data = raw_data.map(lambda line: parse_line(line)).collect()
 #separate into training set and test set
 training_set, test_set = parsed_data.randomSplit([0.6, 0.4], 17)
 #get features for model training
@@ -93,18 +132,7 @@ labeled_points_test = test_set.map(lambda line: construct_labeled_point(line, fe
 lrModel = LogisticRegressionWithLBFGS.train(labeled_points_training)
 #train naive bayes model
 nbModel = NaiveBayes.train(labeled_points_training)
-
-def accuracy(model, labeled_points):
-	num_correct_predict = labeled_points.map(lambda point: is_correct(model, point)).sum()
-	accuracy = double(num_correct_predict) / labeled_points.count()
-	return accuracy
-
-lr_accuracy = accuracy(lrModel, labeled_points_test)
-print ("Accuracy of LogisticRegression Model: " + str(lr_accuracy))
-
-nb_accuracy = accuracy(nbModel, labeled_points_test)
-print ("Accuracy of NaiveBayes Model: " + str(nb_accuracy))
-
+"""
 
 """
 lrModel.predict(training_data.first().features)
