@@ -34,18 +34,18 @@ public class TweetCollect {
 		twitter = new TwitterFactory(cb.build()).getInstance();
 
 		//collectParty();
-		collectEmergency();
-		
+		//collectTraffic();
+		collectSale();
 
 	}
 
-	private static void collectEmergency() throws TwitterException {
-		Query queryEmergency = new Query("delay OR collision OR explosion -filter:retweets");
+	private static void collectTraffic() throws TwitterException {
+		Query queryTraffic = new Query("traffic incident OR jam OR collision OR interstate OR detour -filter:retweets");
 		GeoLocation nyc = new GeoLocation(40.758996, -73.978679);
 		//queryEmergency.since("2015-02-01");
-		queryEmergency.setGeoCode(nyc, 100, Query.MILES);
-		String emergencyOutput = "emergency_dataset.txt";
-		collect(queryEmergency, emergencyOutput);
+		//queryTraffic.setGeoCode(nyc, 600, Query.MILES);
+		String trafficOutput = "traffic_data_raw.txt";
+		collect(queryTraffic, trafficOutput);
 		
 	}
 
@@ -57,6 +57,15 @@ public class TweetCollect {
 			queryParty.setGeoCode(washingtonSqr, 5.0, Query.MILES);
 			String partyOutput = "party_dataset_raw.txt";
 			collect(queryParty, partyOutput);
+	}
+	
+	public static void collectSale() throws TwitterException {
+		Query querySale = new Query("discount OR sale OR mall OR promotion OR deal -filter:retweets");
+		GeoLocation nyc = new GeoLocation(40.758996, -73.978679);
+		querySale.setGeoCode(nyc, 10, Query.MILES);
+		String saleOutput = "sale_data_raw.txt";
+		collect(querySale, saleOutput);
+		
 	}
 
 	//search and collect dataset based on given query, location and write to the 
@@ -100,7 +109,7 @@ public class TweetCollect {
 	public static void writeToFile(Query query) throws TwitterException {
 		QueryResult result = twitter.search(query);
 		// collect 300 tweets
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 3; i++) {
 			for (Status status : result.getTweets()) {
 				String content = status.getText();
 				content.replaceAll("\\r", " ");

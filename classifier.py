@@ -63,7 +63,7 @@ def construct_labeled_point(line, features):
 
 #extract features set from parsed data 
 def feature_extraction(parsed_lines):
-	nonsense_words = ["all", "are", "can", "and", "the", "https", "http", "co", "in", "this", "what", "so", "we", "me", "just", "for", "was", "with", "you", "that","an", "of", "on", "it", "to", "is", "my","all", "very", "from", "99u", "our", "got", "don"]
+	nonsense_words = ["all", "are", "can", "and", "the", "https", "http", "co", "in", "this", "what", "so", "we", "me", "just", "was", "you", "that","an", "of", "it", "to", "is", "my","all", "very", "from", "99u", "our", "got", "don"]
 	all_words = parsed_lines.map(lambda line: line[1]).flatMap(lambda x: x)
 	all_words = all_words.filter(lambda x: x not in nonsense_words)
 	word_count = all_words.map(lambda x: (x, 1.0)).reduceByKey(lambda x,y: x+y)
@@ -102,19 +102,24 @@ def accuracy(model, labeled_points):
 
 party_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/party_dataset.txt"
 lr_model_party, nb_model_party, lp_test_party = training(party_file)
-lr_accuracy = accuracy(lr_model_party, lp_test_party)
-nb_accuracy = accuracy(nb_model_party, lp_test_party)
+acc_lr_party = accuracy(lr_model_party, lp_test_party)
+acc_nb_party = accuracy(nb_model_party, lp_test_party)
 print ("Accuracy of LogisticRegression Model for Party: " + str(lr_accuracy))
 print ("Accuracy of NaiveBayes Model for Party: " + str(nb_accuracy))
 
+traffic_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/traffic_data.txt"
+lr_traf, nb_traf, lp_test_traf = training(traffic_file)
+acc_lr_traf = accuracy(lr_traf, lp_test_traf)
+acc_nb_traf = accuracy(nb_traf, lp_test_traf)
+print acc_lr_traf
+print acc_nb_traf
 
-emer_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/emermg_small.txt"
-lr_model_emer, nb_model_emer, lp_test_emer = training(emer_file)
-emer_lr_acc = accuracy(lr_model_emer, lp_test_emer)
-emer_nb_acc = accuracy(nb_model_emer, lp_test_emer)
-print emer_lr_acc
-print emer_nb_acc
-
+sale_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/sale_data_raw.txt"
+lr_sale, nb_sale, lp_test_sale = training(sale_file)
+acc_lr_sale = accuracy(lr_sale, lp_test_sale)
+acc_nb_sale = accuracy(nb_sale, lp_test_sale)
+print acc_lr_sale
+print acc_nb_sale
 
 """
 file_path = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/party_dataset.txt"
