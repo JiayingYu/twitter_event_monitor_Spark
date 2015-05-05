@@ -13,28 +13,29 @@ api = tweepy.API(auth1)
 #washington square park
 geo = [-75.1914,39.7088,-72.6406,41.5235]
 lan = ['en']
-key_words = ['sale', 'promotion', "deal", "discount"]
+#key_words = ['sale', 'promotion', "deal", "discount"]
+key_words = ["incident"]
 
 class StreamListener(tweepy.StreamListener):
 	def __init__(self):
-        super(StreamListener, self).__init__()		# Not sure if needed
-        self.tweetCount = 0							# Tweets tracked
-        self.tweetThresh = 100						# Tweet tracking limit 
+		super(StreamListener, self).__init__()		# Not sure if needed
+    	# self.tweetCount = 0							# Tweets tracked
+    	# self.tweetThresh = 100						# Tweet tracking limit 
 
 	def on_status(self,tweet):
-		text = tweet.text
+		text = tweet.text.encode('utf-8')
+		#print text
 		parsed_text = parse_line()
 		cur_features = construct_vector(parsed_text)
 		predict = lr_sale.predict(cur_features)
 		if (predict):
-			print(text)
+			print(text).encode('utf-8')
 
 	def on_error(self, status_code):
-        print "Error: " + repr(status_code)
-        return False
+		print "Error: " + repr(status_code)
+		return False
     #end on_error
 
-	if __name__=='__main__':
-    	l = StreamListener()
-    	streamer = tweepy.Stream(auth=auth1,listener=l)
-    	streamer.filter(track = key_words,languages=setLanguages)
+# l = StreamListener()
+# streamer = tweepy.Stream(auth = auth1,listener = l)
+# streamer.filter(track = key_words,languages = lan)

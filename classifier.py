@@ -1,8 +1,12 @@
+from pyspark import SparkContext, SparkConf
 from pyspark.mllib.regression import LabeledPoint
 from pyspark.mllib.classification import LogisticRegressionWithLBFGS
 from pyspark.mllib.classification import NaiveBayes
 from nltk.tokenize import wordpunct_tokenize
 import re
+
+#conf = SparkConf().setAppName("appName").setMaster("local")
+#sc = SparkContext(conf=conf)
 
 #parse the a line of raw data into label, bag of words pair
 def parse_line(line):
@@ -40,7 +44,6 @@ def extract_words_wordpunct(tweet):
 	#bag_of_words = [w for w in tweet if w not in nonsense_words]
 	return tweet
 
-#this function is not used
 def construct_vector(words):
 	vector = []
 	for w in features:
@@ -97,15 +100,15 @@ def training(path):
 
 def accuracy(model, labeled_points):
 	num_correct_predict = labeled_points.map(lambda point: is_correct(model, point)).sum()
-	accuracy = double(num_correct_predict) / labeled_points.count()
+	accuracy = 1.0 * (num_correct_predict) / labeled_points.count()
 	return accuracy
 
 party_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/party_dataset.txt"
 lr_model_party, nb_model_party, lp_test_party = training(party_file)
 acc_lr_party = accuracy(lr_model_party, lp_test_party)
 acc_nb_party = accuracy(nb_model_party, lp_test_party)
-print ("Accuracy of LogisticRegression Model for Party: " + str(lr_accuracy))
-print ("Accuracy of NaiveBayes Model for Party: " + str(nb_accuracy))
+print ("Accuracy of LogisticRegression Model for Party: " + str(acc_lr_party))
+print ("Accuracy of NaiveBayes Model for Party: " + str(acc_nb_party))
 
 traffic_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/traffic_data.txt"
 lr_traf, nb_traf, lp_test_traf = training(traffic_file)
@@ -118,8 +121,17 @@ sale_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/sale_data_ra
 lr_sale, nb_sale, lp_test_sale = training(sale_file)
 acc_lr_sale = accuracy(lr_sale, lp_test_sale)
 acc_nb_sale = accuracy(nb_sale, lp_test_sale)
+
+print ("Accuracy of LogisticRegression Model for Party: " + str(acc_lr_party))
+print ("Accuracy of NaiveBayes Model for Party: " + str(acc_nb_party))
+
+print acc_lr_traf
+print acc_nb_traf
+
 print acc_lr_sale
 print acc_nb_sale
+
+
 
 """
 file_path = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/party_dataset.txt"
