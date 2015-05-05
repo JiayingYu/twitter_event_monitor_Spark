@@ -60,12 +60,11 @@ public class TweetCollect {
 	}
 	
 	public static void collectSale() throws TwitterException {
-		Query querySale = new Query("discount OR sale OR mall OR promotion OR deal -filter:retweets");
+		Query querySale = new Query("discount OR sale OR mall OR deal -filter:retweets");
 		GeoLocation nyc = new GeoLocation(40.758996, -73.978679);
 		querySale.setGeoCode(nyc, 10, Query.MILES);
-		String saleOutput = "sale_data_raw.txt";
+		String saleOutput = "sale_data_raw_2.txt";
 		collect(querySale, saleOutput);
-		
 	}
 
 	//search and collect dataset based on given query, location and write to the 
@@ -109,7 +108,7 @@ public class TweetCollect {
 	public static void writeToFile(Query query) throws TwitterException {
 		QueryResult result = twitter.search(query);
 		// collect 300 tweets
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 2; i++) {
 			for (Status status : result.getTweets()) {
 				String content = status.getText();
 				content.replaceAll("\\r", " ");

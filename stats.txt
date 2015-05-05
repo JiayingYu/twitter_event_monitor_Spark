@@ -1,0 +1,73 @@
+Results
+====================================
+Party dataset
+
+LR accuracy: 0.805084745763
+LR Precision: 0.692307692308
+LR Recall: 0.9375
+
+NB accuracy: 0.728813559322
+NB Precision: 0.608108108108
+NB Recall: 0.9375
+
+SVM accuracy: 0.813559322034
+SVM Precision:0.691176470588
+SVM Recall: 0.979166666667
+
+change the threshold to 0.8 for LR and SVM
+
+LR Precision: 0.810810810811
+LR Recall: 0.625
+
+SVM Precision: 0.714285714286
+SVM Recall: 0.9375
+====================================
+
+====================================
+Traffic dataset
+
+LR accuracy: 0.818181818182
+LR Precision: 0.869565217391
+LR Recall: 0.821917808219
+
+NB accuracy: 0.851239669421
+NB Precision: 0.876712328767
+NB Recall: 0.876712328767
+
+SVM accuracy: 0.822033898305
+SVM Precision:0.9
+SVM Recall: 0.86301369863
+
+change the threshold to 0.8 for LR and SVM
+
+LR Precision: 0.929824561404
+LR Recall: 0.72602739726
+
+SVM Precision: 1.0
+SVM Recall: 0.561643835616
+====================================
+
+====================================
+Sale dataset
+
+LR accuracy: 0.777777777778
+LR Precision: 0.709677419355
+LR Recall: 0.758620689655
+
+NB accuracy: 0.736111111111
+NB Precision: 0.692307692308
+NB Recall: 0.620689655172
+
+SVM accuracy: 0.822033898305
+SVM Precision:0.666666666667
+SVM Recall: 0.620689655172
+
+change the threshold to 0.8 for LR and SVM
+
+LR Precision: 0.764705882353
+LR Recall: 0.448275862069
+
+SVM Precision: 0.875
+SVM Recall: 0.48275862069
+====================================
+

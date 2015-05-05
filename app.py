@@ -6,8 +6,10 @@ from pyspark.mllib.classification import SVMWithSGD
 from nltk.tokenize import wordpunct_tokenize
 import re
 
+
 conf = SparkConf().setAppName("appName").setMaster("local")
 sc = SparkContext(conf=conf)
+
 
 #parse the a line of raw data into label, bag of words pair
 def parse_line(line):
@@ -131,6 +133,24 @@ def print_stats(train_result, dataset_name):
 	prec_svm = precision(train_result[2], train_result[3])
 	recall_svm = recall(train_result[2], train_result[3])
 
+	fd = open(stats_out, "a")
+	fd.write("====================================\n")
+	fd.write(dataset_name + "\n\n")
+
+	fd.write("LR accuracy: " + str(acc_lr) + "\n")
+	fd.write("LR Precision: " + str(prec_lr) + "\n")
+	fd.write("LR Recall: " + str(recall_lr) + "\n\n")
+
+	fd.write("NB accuracy: " + str(acc_nb) + "\n")
+	fd.write("NB Precision: " + str(prec_nb) + "\n")
+	fd.write("NB Recall: " + str(recall_nb) + "\n\n")
+
+	fd.write("SVM accuracy: " + str(acc_svm) + "\n")
+	fd.write("SVM Precision:" + str(prec_svm) + "\n")
+	fd.write("SVM Recall: " + str(recall_svm) + "\n")
+
+	fd.write("\nchange the threshold to 0.8 for LR and SVM\n\n")
+
 	train_result[0].setThreshold(0.8)
 	train_result[2].setThreshold(0.8)
 
@@ -140,31 +160,22 @@ def print_stats(train_result, dataset_name):
 	prec_svm_2 = precision(train_result[2], train_result[3])
 	recall_svm_2 = recall(train_result[2], train_result[3])
 
-	print ("====================================")
-	print (dataset_name)
-	print ("LR accuracy: " + str(acc_lr))
-	print ("NB accuracy: " + str(acc_nb))
-	print ("SVM accuracy: " + str(acc_svm))
+	fd.write("LR Precision: " + str(prec_lr_2)  + "\n")
+	fd.write("LR Recall: " + str(recall_lr_2)  + "\n\n")
 
-	print ("Precision of LR: " + str(prec_lr))
-	print ("Recall of LR: " + str(recall_lr))
+	fd.write("SVM Precision: " + str(prec_svm_2)  + "\n")
+	fd.write("SVM Recall: " + str(recall_svm_2)  + "\n")	
 
-	print ("Precision of NB: " + str(prec_nb))
-	print ("Recall of NB: " + str(recall_nb))
+	fd.write("====================================\n\n")
 
-	print ("Precision of SVM: " + str(prec_svm))
-	print ("Recall of SVM: " + str(recall_svm))
+	fd.close()
 
-	print ("Change the threshold to 0.8 for LR and SVM")
+stats_out = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/stats.txt"
+f = open(stats_out, "w")
+f.write("Results\n")
+f.close()
 
-	print ("Precision of LR: " + str(prec_lr_2))
-	print ("Recall of LR: " + str(recall_lr_2))
-
-	print ("Precision of SVM: " + str(prec_svm_2))
-	print ("Recall of SVM: " + str(recall_svm_2))
-	print ("====================================")
-
-party_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/party_dataset.txt"
+party_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/party_data_labeled.txt"
 party_result = training(party_file)
 
 # acc_lr_party = accuracy(party_result[0], party_result[3])
@@ -180,7 +191,7 @@ party_result = training(party_file)
 # recall_svm_party = recall(party_result[2], party_result[3])
 
 
-traffic_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/traffic_data.txt"
+traffic_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/traffic_data_labeled.txt"
 traffic_result = training(traffic_file)
 # acc_lr_traf = accuracy(traffic_result[0], traffic_result[3])
 # acc_nb_traf = accuracy(traffic_result[1], traffic_result[3])
@@ -188,8 +199,10 @@ traffic_result = training(traffic_file)
 #print acc_lr_traf
 #print acc_nb_traf
 
-sale_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/sale_data_raw.txt"
+sale_file = "/Users/jiayingyu/Dropbox/workSpace/twitterEventMonitor/sale_data_labeled.txt"
 sale_result = training(sale_file)
+
+
 # acc_lr_sale = accuracy(sale_result[0], sale_result[3])
 # acc_nb_sale = accuracy(sale_result[1], sale_result[3])
 
@@ -204,11 +217,11 @@ sale_result = training(sale_file)
 # print ("Precision of SVM: " + str(prec_svm_party))
 # print ("Recall of SVM: " + str(recall_svm_party))
 
+'''print the result'''
 print_stats(party_result, "Party dataset")
-
 print_stats(traffic_result, "Traffic dataset")
-
 print_stats(sale_result, "Sale dataset")
+
 
 ''''''''''''''''compute distance of two points'''''''''''
 import math
@@ -251,10 +264,10 @@ class StreamListener(tweepy.StreamListener):
 		# 			print text.encode('utf-8')
 
 		bag_of_words = extract_words_wordpunct(text)
-		vector = construct_vector(bag_of_words, party_result[4])
-		predict = party_result[0].predict(vector)
+		vector = construct_vector(bag_of_words, traffic_result[4])
+		predict = traffic_result[2].predict(vector)
 		if (predict):
-			print text.encode('utf-8') + "\n-----------------\n"
+			print text.encode('utf-8') + "\n-----------------------------\n"
 
 	def on_error(self, status_code):
 		print "Error: " + repr(status_code)
@@ -272,11 +285,13 @@ api = tweepy.API(auth1)
 #washington square park 
 geo = [40.7300, -73.9950] #lan #long
 lan = ['en']
-#key_words = ["sale", "promotion", "deal", "discount"]
-#key_words = ["traffic incident","jam","collision","interstate","detour"]
-key_words = ['party', 'beer', 'fire']
+key_words_sale = ["sale", "promotion", "deal", "discount"]
+key_words_traffic = ["traffic incident","jam","collision","interstate","detour"]
+key_words_party = ['party', 'beer', 'fire']
 
 l = StreamListener()
 streamer = tweepy.Stream(auth = auth1,listener = l)
-#streamer.filter(track = key_words,languages = lan)
+#streamer.filter(track = key_words_party,languages = lan)
+streamer.filter(track = key_words_traffic,languages = lan)
+#streamer.filter(track = key_words_sale,languages = lan)
 
